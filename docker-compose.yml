@@ -1,0 +1,13 @@
+version: "3.5"
+
+services:
+  redis:
+    container_name: redis
+    image: redis:4.0-alpine
+    networks:
+      - bitrager
+    ports:
+      - "6379:6379"
+
+networks: 
+  bitrager:

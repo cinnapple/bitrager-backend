@@ -1,0 +1,66 @@
+{
+  "name": "app",
+  "version": "0.0.1",
+  "description": "APP",
+  "engineStrict": true,
+  "engines": {
+    "node": ">= 8.9.0"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.22",
+    "@types/jest": "^23.3.1",
+    "@types/lodash": "^4.14.116",
+    "@types/node": "^10.11.4",
+    "@types/redis": "^2.8.6",
+    "@types/yargs": "^12.0.1",
+    "jest": "^23.5.0",
+    "rimraf": "~2.6.2",
+    "ts-jest": "^23.1.4",
+    "tslint": "~5.10.0",
+    "tslint-microsoft-contrib": "~5.0.3",
+    "tsutils": "~2.27.1",
+    "typescript": "~2.9.1"
+  },
+  "scripts": {
+    "start:prepare": "nodemon ./build/src/index.js --work=prepare",
+    "start:plan": "nodemon ./build/src/index.js --work=plan",
+    "clean": "rimraf coverage build tmp",
+    "build": "tsc -p tsconfig.release.json",
+    "watch": "tsc -w -p tsconfig.release.json",
+    "lint": "tslint -t stylish --project \"tsconfig.json\"",
+    "pretest": "npm run lint",
+    "test": "npm run test-only",
+    "test-only": "jest --coverage",
+    "test:watch": "jest --watch"
+  },
+  "author": "Cinnapple <cinnapple.fun@gmail.com>",
+  "license": "APLv2",
+  "dependencies": {
+    "@slack/client": "^4.8.0",
+    "app-root-path": "^2.1.0",
+    "axios": "^0.18.0",
+    "bluebird": "^3.5.1",
+    "inversify": "^4.13.0",
+    "lodash": "^4.17.11",
+    "moment": "^2.22.2",
+    "nodemon": "^1.18.3",
+    "redis": "^2.8.0",
+    "reflect-metadata": "^0.1.12",
+    "tslib": "~1.9.2",
+    "yargs": "^12.0.2"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.ts?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(js?|ts?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  }
+}
