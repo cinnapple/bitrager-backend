@@ -1,23 +1,21 @@
 import { argv } from "yargs";
 import { TYPES } from "./inversify";
-import { container } from "./inversify/bootstrap";
+import { container, bootstrap } from "./inversify/bootstrap";
 import config from "./config";
 
+// retrieve the worker definition and exchange based on the arguments.
 const workerDefinition = config.workers.find(a => a.id === argv.work);
-
-if (!workerDefinition) {
-  throw new Error(`no workder definition found for work id '${argv.work}'`);
+const exchangeConfig = config.exchanges.find(a => a.id === argv.exchange);
+if (!workerDefinition || !exchangeConfig) {
+  throw new Error(
+    `no workder definition found for '${argv.exchange}.${argv.work}'`
+  );
 }
 
-console.log(`worker '${workerDefinition.id}' started`);
+// bootstrap dependencies.
+bootstrap(workerDefinition, exchangeConfig);
 
-// merge the core config with the worker specific config.
-container.bind<any>(TYPES.Core.Config).toConstantValue({
-  ...config,
-  ...workerDefinition.config
-});
-
-// start the processor
+// register the worker jobs for this worker to the processor
 const processor = container.get<core.IJobProcessor>(TYPES.Core.JobProcessor);
 workerDefinition.jobs.forEach(job => {
   if (!TYPES.Job[job]) {
@@ -25,4 +23,7 @@ workerDefinition.jobs.forEach(job => {
   }
   processor.registerJob(container.get<core.IJob>(TYPES.Job[job]));
 });
+
+// start
+console.log(`starting the worker '${argv.exchange}.${workerDefinition.id}'...`);
 processor.fire(workerDefinition.interval);

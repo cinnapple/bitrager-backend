@@ -1,50 +1,43 @@
 import "reflect-metadata";
 import { injectable, inject, TYPES } from "../inversify";
 
-import Graph from "../core/graph";
 import { CacheKeys } from "../core/enum";
+import GraphOp from "../core/graphOp";
 
 interface ICurrencyNode extends core.INode<model.ICurrency> {}
 
 @injectable()
 export default class FetchCurrencyPairs implements core.IJob {
   constructor(
-    @inject(TYPES.Core.WebClient) private _webClient: core.IWebClient,
-    @inject(TYPES.Core.Cache) private _cache: core.ICache
+    @inject(TYPES.Core.Cache) private _cache: core.ICache,
+    @inject(TYPES.Market.ExpertAdvisor) private _ea: market.IExpertAdvisor
   ) {}
-
-  private _fetch = () =>
-    this._webClient.get<market.polo.ReturnTickerResponse>(
-      "https://poloniex.com/public?command=returnTicker"
-    );
 
   get name() {
     return "FetchCurrencyPairs";
   }
 
   execute = async (_previous: core.IJobResult) => {
-    const data = await this._fetch();
+    const data = await this._ea.getCurrencyPairs();
 
     // store currency pairs
-    await this._cache.set(CacheKeys.MKT_CURR, data);
+    await this._cache.set(CacheKeys.ALL_PAIRS, data);
 
     // store currency in a graph.
-    const graph = new Graph<model.ICurrency>();
-    for (const key in data) {
-      const from = key.split("_")[0];
-      const to = key.split("_")[1];
-      const fromCurr: model.ICurrency = { id: from, name: from };
-      const toCurr: model.ICurrency = { id: to, name: to };
-      const fromNode: ICurrencyNode = { id: from, data: fromCurr };
-      const toNode: ICurrencyNode = { id: to, data: toCurr };
+    const graphOp = new GraphOp<model.ICurrency>();
+    data.forEach(pair => {
+      const fromCurr: model.ICurrency = { id: pair.from, name: pair.from };
+      const toCurr: model.ICurrency = { id: pair.to, name: pair.to };
+      const fromNode: ICurrencyNode = { id: pair.from, data: fromCurr };
+      const toNode: ICurrencyNode = { id: pair.to, data: toCurr };
       const edge: core.IEdge = { from: fromNode.id, to: toNode.id };
-      graph.addNode(fromNode);
-      graph.addNode(toNode);
-      graph.addEdge(edge);
-    }
-    await this._cache.set(CacheKeys.MKT_CURRGRAPH, graph, Graph.serialize);
+      graphOp.addNode(fromNode);
+      graphOp.addNode(toNode);
+      graphOp.addEdge(edge);
+    });
 
-    // success result
+    await this._cache.set(CacheKeys.ALL_PAIR_GRAPH, graphOp.graph);
+
     return {
       continue: true,
       result: true,

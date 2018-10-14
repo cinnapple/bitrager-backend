@@ -20,6 +20,10 @@ declare namespace core {
   export interface IGraph<TData extends IData> {
     nodes: INode<TData>[];
     edges: IEdge[];
+  }
+
+  export interface IGraphOp<TData extends IData> extends IGraph<TData> {
+    graph: IGraph<TData>;
     addNode(node: INode<TData>): void;
     addEdge(edge: IEdge): void;
   }
@@ -54,8 +58,9 @@ declare namespace core {
   }
 
   export interface IExchangeConfig {
-    id: "poloniex";
+    id: "poloniex" | "kraken";
     takerFees: number;
+    startCurrency: string;
   }
 
   export interface IConfig {
@@ -69,18 +74,13 @@ declare namespace core {
     };
     maxDepth: number;
     maxUSD: number;
-    startCurrency: string;
     exchanges: IExchangeConfig[];
     workers: IWorkerDefinition[];
   }
 
   export interface ICache {
     get<T>(key: string, deserializer?: (value: string) => T): Promise<T>;
-    set<T>(
-      key: string,
-      data: T,
-      serializer?: (value: T) => string
-    ): Promise<void>;
+    set<T>(key: string, data: T, serializer?: (value: T) => string): Promise<T>;
   }
 
   export interface ITimer {

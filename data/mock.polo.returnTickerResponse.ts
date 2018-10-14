@@ -35,4 +35,4 @@ export default {
     high24hr: "0.00000087",
     low24hr: "0.00000083"
   }
-};
+} as market.polo.ReturnTickerResponse;

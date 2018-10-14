@@ -1,5 +1,5 @@
 export default {
   Market: {
-    PoloResponseCanonicalizer: Symbol.for("PoloResponseCanonicalizer")
+    ExpertAdvisor: Symbol.for("ExpertAdvisor")
   }
 };

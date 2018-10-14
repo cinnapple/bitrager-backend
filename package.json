@@ -22,8 +22,10 @@
     "typescript": "~2.9.1"
   },
   "scripts": {
-    "start:prepare": "nodemon ./build/src/index.js --work=prepare",
-    "start:plan": "nodemon ./build/src/index.js --work=plan",
+    "start:poloniex.prepare": "nodemon ./build/src/index.js --work=prepare --exchange=poloniex",
+    "start:poloniex.plan": "nodemon ./build/src/index.js --work=plan --exchange=kraken",
+    "start:kraken.prepare": "nodemon ./build/src/index.js --work=prepare --exchange=poloniex",
+    "start:kraken.plan": "nodemon ./build/src/index.js --work=plan --exchange=kraken",
     "clean": "rimraf coverage build tmp",
     "build": "tsc -p tsconfig.release.json",
     "watch": "tsc -w -p tsconfig.release.json",

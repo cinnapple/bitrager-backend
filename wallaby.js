@@ -2,6 +2,7 @@ module.exports = function() {
   return {
     files: [
       "src/**/*.ts",
+      "data/**/*.ts",
       { pattern: "tsconfig.*", instrument: false },
       { pattern: "package.json", instrument: false }
     ],

@@ -12,17 +12,12 @@ interface State {
 
 @injectable()
 export default class PlanArbitrage implements core.IJob {
-  private _fees: number;
   constructor(
     @inject(TYPES.Core.Config) private _config: core.IConfig,
     @inject(TYPES.Core.Cache) private _cache: core.ICache,
+    @inject(TYPES.Market.ExpertAdvisor) private _ea: market.IExpertAdvisor,
     @inject(TYPES.Core.Reporter) private _reporter: core.IReporter
-  ) {
-    // set the taker fee.
-    this._fees = this._config.exchanges.find(
-      a => a.id === "poloniex"
-    ).takerFees;
-  }
+  ) {}
 
   private _yieldRange = (start: number, last: number, step: number) => {
     const range = [];
@@ -30,10 +25,6 @@ export default class PlanArbitrage implements core.IJob {
       range.push(i);
     }
     return range;
-  };
-
-  private _afterFees = (vol: number) => {
-    return vol * (1 - this._fees);
   };
 
   private _getNextState = (
@@ -62,9 +53,8 @@ export default class PlanArbitrage implements core.IJob {
               ? currentState.funds / curr.px
               : currentState.funds * curr.px;
         }
-
         currentState.funds -= disposition;
-        nextState.funds += this._afterFees(acquisition);
+        nextState.funds += this._ea.applyTakerFees(acquisition);
         return nextState;
       },
       { curr: toCurrency, funds: 0 }
@@ -77,20 +67,15 @@ export default class PlanArbitrage implements core.IJob {
 
   execute = async () => {
     const orderbooks = await this._cache.get<model.IOrderBook[]>(
-      CacheKeys.MKT_ORDERBOOKS
+      CacheKeys.ORDERBOOKS
     );
     const routes = await this._cache.get<model.CurrencyRoutes>(
-      CacheKeys.STR_ROUTES
+      CacheKeys.ROUTES
     );
-    // const account = await this._cache.get<model.AccountInfo>(
-    //   CacheKeys.MKT_ACCOUNT
-    // );
-    const account = {
-      USDT: {
-        qty: 1200
-      }
-    };
-    const max = _.min([this._config.maxUSD, account.USDT.qty]);
+    const account = await this._cache.get<model.AccountInfo>(
+      CacheKeys.ACCOUNT_INFO
+    );
+    const max = _.min([this._config.maxUSD, account.USDT]);
 
     // plan arbitrage for each possbile path
     const executionPlan: core.IExecutionPlan = {
@@ -101,7 +86,7 @@ export default class PlanArbitrage implements core.IJob {
       routes.forEach(route => {
         const states = [
           {
-            curr: this._config.startCurrency,
+            curr: this._ea.info.startCurrency,
             funds: qty
           }
         ];
@@ -145,15 +130,9 @@ export default class PlanArbitrage implements core.IJob {
       this._reporter.notify(
         JSON.stringify(_.maxBy(executionPlan.plans, a => a.profit))
       );
-      console.log(
-        `!! FOUND ${JSON.stringify(
-          _.maxBy(executionPlan.plans, a => a.profit)
-        )}`
-      );
     }
 
     await this._cache.set<core.IExecutionPlan>(CacheKeys.PLAN, executionPlan);
-
     return {
       continue: executionPlan.plans.length > 0,
       result: executionPlan,

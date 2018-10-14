@@ -1,5 +1,5 @@
 import "jest";
-import Graph from "../../src/core/graph";
+import GraphOp from "../../src/core/graphOp";
 
 const btc: model.ICurrency = { id: "BTC", name: "Bitcoin1" };
 const xrp: model.ICurrency = { id: "XRP", name: "Ripple" };
@@ -19,7 +19,7 @@ const currencyNodes: core.INode<model.ICurrency>[] = [
 
 describe("Graph", () => {
   test("addNode", () => {
-    const graph = new Graph<model.ICurrency>();
+    const graph = new GraphOp<model.ICurrency>();
     currencyNodes.forEach(node => graph.addNode(node));
 
     expect(graph.nodes).toEqual(currencyNodes.slice(0, 5));
@@ -29,7 +29,7 @@ describe("Graph", () => {
   });
 
   test("addEdge", () => {
-    const graph = new Graph<model.ICurrency>();
+    const graph = new GraphOp<model.ICurrency>();
     currencyNodes.forEach(node => graph.addNode(node));
 
     const xrp_btc: core.IEdge = { from: xrp.id, to: btc.id };
@@ -57,7 +57,7 @@ describe("Graph", () => {
   });
 
   test("bfs", () => {
-    const graph = new Graph<model.ICurrency>();
+    const graph = new GraphOp<model.ICurrency>();
     currencyNodes.forEach(node => graph.addNode(node));
 
     // xrp -> btc -> eth -> xrp

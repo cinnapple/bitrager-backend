@@ -4,45 +4,46 @@ import { injectable } from "../inversify";
 import * as _ from "lodash";
 
 @injectable()
-export default class Graph<TData extends core.IData> {
-  private _nodes: core.INode<TData>[] = [];
-  private _edges: core.IEdge[] = [];
+export default class GraphOp<TData extends core.IData>
+  implements core.IGraphOp<TData> {
+  constructor(private _graph?: core.IGraph<TData>) {
+    if (!_graph) {
+      this._graph = {
+        nodes: [],
+        edges: []
+      };
+    }
+  }
 
   get nodes() {
-    return this._nodes;
+    return this._graph.nodes;
   }
 
   get edges() {
-    return this._edges;
+    return this._graph.edges;
+  }
+
+  get graph() {
+    return this._graph;
   }
 
   nodeExists = (node: core.INode<TData>): boolean =>
-    !!this._nodes.find(a => a.id === node.id);
+    !!this._graph.nodes.find(a => a.id === node.id);
 
   edgeExists = (edge: core.IEdge): boolean =>
-    !!this._edges.find(a => a.from === edge.from && a.to === edge.to);
+    !!this._graph.edges.find(a => a.from === edge.from && a.to === edge.to);
 
   addNode = (node: core.INode<TData>) =>
-    !this.nodeExists(node) && this._nodes.push(node);
+    !this.nodeExists(node) && this._graph.nodes.push(node);
 
   addEdge = (edge: core.IEdge) =>
-    !this.edgeExists(edge) && this._edges.push(edge);
+    !this.edgeExists(edge) && this._graph.edges.push(edge);
 
   getEdgesFromNode = (nodeId: string) =>
-    this._edges.filter(a => a.from === nodeId);
+    this._graph.edges.filter(a => a.from === nodeId);
 
-  getEdgesToNode = (nodeId: string) => this._edges.filter(a => a.to === nodeId);
-
-  static serialize = <TData extends core.IData>(graph: Graph<TData>) =>
-    JSON.stringify([graph._nodes, graph._edges]);
-
-  static deserialize = <TData extends core.IData>(value: string) => {
-    const graph = new Graph<TData>();
-    const data = JSON.parse(value);
-    graph._nodes = data[0];
-    graph._edges = data[1];
-    return graph;
-  };
+  getEdgesToNode = (nodeId: string) =>
+    this._graph.edges.filter(a => a.to === nodeId);
 
   private _findRouteDepthBfs = (
     fromId: string,
@@ -79,7 +80,7 @@ export default class Graph<TData extends core.IData> {
 
   findRouteDepth = (depth: number) => {
     const currentHeight = 1;
-    const result = this._nodes.map(n => {
+    const result = this._graph.nodes.map(n => {
       const cum = [n.id];
       return this._findRouteDepthBfs(n.id, cum, currentHeight, depth);
     });

@@ -3,13 +3,11 @@ declare namespace model {
     name: string;
   }
 
+  export interface ICurrencyGraph extends core.IGraph<model.ICurrency> {}
+
   export type CurrencyRoutes = string[][];
 
-  export interface Account {
-    qty: number;
-  }
-
-  export type AccountInfo = core.HashMap<Account>;
+  export type AccountInfo = core.HashMap<number>;
 
   export interface ICurrencyPair {
     from: string;

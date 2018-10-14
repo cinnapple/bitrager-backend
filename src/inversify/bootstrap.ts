@@ -6,7 +6,13 @@ import JobBootstrapper from "../jobs/bootstrap";
 
 const container = new Container();
 
-CoreBootstrapper(container);
-MarketBootstrapper(container);
-JobBootstrapper(container);
-export { container };
+const bootstrap = (
+  workerDefinition: core.IWorkerDefinition,
+  exchangeConfig: core.IExchangeConfig
+) => {
+  CoreBootstrapper(container, workerDefinition);
+  MarketBootstrapper(container, exchangeConfig);
+  JobBootstrapper(container);
+};
+
+export { bootstrap, container };

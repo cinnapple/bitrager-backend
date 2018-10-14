@@ -33,10 +33,10 @@ export default class Cache implements core.ICache {
     value: T,
     serializer: (value: T) => string = v => JSON.stringify(v)
   ) => {
-    return new Promise<void>(resolve => {
+    return new Promise<T>(resolve => {
       this._client.set(key, serializer(value), () => {
         console.log(`- ${key} cached`);
-        resolve();
+        resolve(value);
       });
     });
   };

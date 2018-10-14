@@ -7,17 +7,17 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "worker:prepare",
+      "name": "poloniex.prepare",
       "program": "${workspaceFolder}/build/src/index.js",
-      "args": ["--work=prepare"],
+      "args": ["--work=prepare", "--exchange=poloniex"],
       "outFiles": ["${workspaceFolder}/**/*.js"]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "worker:plan",
+      "name": "poloniex.plan",
       "program": "${workspaceFolder}/build/src/index.js",
-      "args": ["--work=plan"],
+      "args": ["--work=plan", "--exchange=poloniex"],
       "outFiles": ["${workspaceFolder}/**/*.js"]
     }
   ]
